@@ -1,0 +1,20 @@
+$gameWidth: 560px;
+$gameHeight: 560px;
+$gameTiles: 8px;
+
+.app {
+  display: flex;
+  padding: 30px;
+}
+.game {
+  width: $gameWidth;
+  height: $gameHeight;
+  display: flex;
+  flex-wrap: wrap;
+
+  img {
+    width: 70px;
+    height: 70px;
+    // height: math.div($gameHeight, $gameTiles);
+  }
+}
