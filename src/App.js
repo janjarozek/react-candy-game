@@ -1,29 +1,62 @@
 import React, {useState, useEffect} from 'react'
 
+import blueCandy from './images/blue.png'
+import greenCandy from './images/green.png'
+import orangeCandy from './images/orange.png'
+import purpleCandy from './images/purple.png'
+import redCandy from './images/red.png'
+import yellowCandy from './images/yellow.png'
+import blank from './images/blank.png'
+
 const width = 8
-// const candyColors = ['blue', 'green', 'orange']
-const candyColors = ['blue', 'green', 'orange', 'purple', 'red', 'yellow']
+// const candyColors = ['blue', 'green', 'orange', 'purple', 'red', 'yellow']
+const candyColors = [blueCandy, greenCandy, orangeCandy, purpleCandy, redCandy, yellowCandy]
 
 
 const App = () => {
   const [currentColorArrangement, setCurrentColorArrangement] = useState([])
-  const [squareBeingDraged, setSquareBeingDraged] = useState(null)
+  const [squareBeingDragged, setsquareBeingDragged] = useState(null)
   const [squareBeingDroped, setSquareBeingDroped] = useState(null)
 
   const prevDefault = e => e.preventDefault()
 
   const handleDragStart = (e) => {
-    setSquareBeingDraged(e.target)
+    setsquareBeingDragged(e.target)
   }
   const handleOnDrop = (e) => {
     setSquareBeingDroped(e.target)
   }
   const handleDragEnd = (e) => {
+    // write the moved squares id
     const squareBeingReplacedId = parseInt(squareBeingDroped.getAttribute('data-id'));
-    const squareBeingDraggedId = parseInt(squareBeingDraged.getAttribute('data-id'));
-
-    currentColorArrangement[parseInt(squareBeingReplacedId)] = squareBeingDraged.style.backgroundColor
+    const squareBeingDraggedId = parseInt(squareBeingDragged.getAttribute('data-id'));
+    // flip the squares
+    currentColorArrangement[parseInt(squareBeingReplacedId)] = squareBeingDragged.style.backgroundColor
     currentColorArrangement[parseInt(squareBeingDraggedId)] = squareBeingDroped.style.backgroundColor
+    // set valid moves
+    const validMoves = [
+      squareBeingDraggedId + 1,
+      squareBeingDraggedId - 1,
+      squareBeingDraggedId + width,
+      squareBeingDraggedId - width
+    ]
+    const validMove = validMoves.includes(squareBeingReplacedId)
+    // check for matches
+    const hasColumnOfThree = checkForColumnOfThree()
+    const hasColumnOfFour = checkForColumnOfFour()
+    const hasRowOfThree = checkForRowOfThree()
+    const hasRowOfFour = checkForRowOfFour()
+    // check if this was a valid move and has three/four matches
+    if (squareBeingDraggedId &&
+        validMove && (hasColumnOfThree || hasColumnOfFour || hasRowOfThree || hasRowOfFour)) {
+        setSquareBeingDroped(null);
+        setsquareBeingDragged(null);
+      } else {
+      // otherwise revert the colors as they were
+      currentColorArrangement[squareBeingReplacedId] = squareBeingDroped.style.backgroundColor
+      currentColorArrangement[squareBeingDraggedId] = squareBeingDragged.style.backgroundColor
+      setCurrentColorArrangement([...currentColorArrangement])
+    }
   }
 
   const moveIntoSquareBelowFillEmpty = () => {
@@ -48,6 +81,7 @@ const App = () => {
 
         if(rowOfThree.every(square => currentColorArrangement[square] === decidedColor)) {
           rowOfThree.forEach(square => currentColorArrangement[square] = '')
+          return true
         }
       }
     }
@@ -63,6 +97,7 @@ const App = () => {
 
         if(rowOfFour.every(square => currentColorArrangement[square] === decidedColor)) {
           rowOfFour.forEach(square => currentColorArrangement[square] = '')
+          return true
         }
       }
     }
@@ -75,6 +110,7 @@ const App = () => {
 
       if ( columnOfThree.every( square => currentColorArrangement[square] === decidedColor)) {
         columnOfThree.forEach(square => currentColorArrangement[square] = '')
+        return true
       }
     }
   }
@@ -86,6 +122,7 @@ const App = () => {
 
       if ( columnOfFour.every( square => currentColorArrangement[square] === decidedColor)) {
         columnOfFour.forEach(square => currentColorArrangement[square] = '')
+        return true
       }
     }
   }
@@ -132,6 +169,7 @@ const App = () => {
             key={`img-${index}`}
             alt={candyColor}
             style={{backgroundColor: candyColor}}
+            // src={`./images/${candyColor}.png`}
             data-id={index}
             draggable={true}
             onDragStart={handleDragStart}
