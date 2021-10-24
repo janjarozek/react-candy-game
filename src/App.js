@@ -7,14 +7,42 @@ const candyColors = ['blue', 'green', 'orange', 'purple', 'red', 'yellow']
 
 const App = () => {
   const [currentColorArrangement, setCurrentColorArrangement] = useState([])
+  const [squareBeingDraged, setSquareBeingDraged] = useState(null)
+  const [squareBeingDroped, setSquareBeingDroped] = useState(null)
 
-  
+  const prevDefault = e => e.preventDefault()
+
+  const handleDragStart = (e) => {
+    setSquareBeingDraged(e.target)
+  }
+  const handleOnDrop = (e) => {
+    setSquareBeingDroped(e.target)
+  }
+  const handleDragEnd = (e) => {
+    const squareBeingReplacedId = parseInt(squareBeingDroped.getAttribute('data-id'));
+    const squareBeingDraggedId = parseInt(squareBeingDraged.getAttribute('data-id'));
+
+    currentColorArrangement[parseInt(squareBeingReplacedId)] = squareBeingDraged.style.backgroundColor
+    currentColorArrangement[parseInt(squareBeingDraggedId)] = squareBeingDroped.style.backgroundColor
+  }
+
+  const moveIntoSquareBelowFillEmpty = () => {
+    currentColorArrangement.map((item, index) => {
+      if ((index >= width) && item === '') {
+        currentColorArrangement[index] = currentColorArrangement[index-width]
+        currentColorArrangement[index-width] = ''
+      }
+      if ((index < width) && item ==='') {
+        currentColorArrangement[index] = candyColors[Math.floor(Math.random() * candyColors.length)]
+      }
+    })
+  }
 
   const checkForRowOfThree = () => {
     // select a row
     for(let j=0; j < width; j++) {
       // check in a row
-      for(let i = j*width; i < width+(j*width)-3; i++) {
+      for(let i = j*width; i < width+(j*width)-2; i++) {
         const rowOfThree = [i, i+1, i+2]
         const decidedColor = currentColorArrangement[i]
 
@@ -29,7 +57,7 @@ const App = () => {
     // select a row
     for(let j=0; j < width; j++) {
       // check in a row
-      for(let i = j*width; i < width+(j*width)-4; i++) {
+      for(let i = j*width; i < width+(j*width)-3; i++) {
         const rowOfFour = [i, i+1, i+2, i+3]
         const decidedColor = currentColorArrangement[i]
 
@@ -41,7 +69,7 @@ const App = () => {
   }
 
   const checkForColumnOfThree = () => {
-    for(let i=0; i < (width *(width-2))-1; i++) {
+    for(let i=0; i <= (width *(width-2))-1; i++) {
       const columnOfThree = [i, i+width, i+(width*2)];
       const decidedColor = currentColorArrangement[i];
 
@@ -52,7 +80,7 @@ const App = () => {
   }
 
   const checkForColumnOfFour = () => {
-    for(let i=0; i < (width *(width-3))-1; i++) {
+    for(let i=0; i <= (width *(width-3))-1; i++) {
       const columnOfFour = [i, i+width, i+(width*2), i+(width*3)];
       const decidedColor = currentColorArrangement[i];
 
@@ -82,10 +110,16 @@ const App = () => {
       checkForColumnOfFour()
       checkForRowOfThree()
       checkForColumnOfThree()
+      moveIntoSquareBelowFillEmpty()
       setCurrentColorArrangement([...currentColorArrangement])
     }, 100)
     return () => clearInterval(timer)
-  }, [currentColorArrangement])
+  }, [currentColorArrangement,
+    checkForRowOfFour,
+    checkForColumnOfFour,
+    checkForRowOfThree,
+    checkForColumnOfThree,
+    moveIntoSquareBelowFillEmpty])
   // }, [checkForColumnOfFour, checkForColumnOfThree, currentColorArrangement])
 
   // console.log(currentColorArrangement)
@@ -97,7 +131,17 @@ const App = () => {
           <img
             key={`img-${index}`}
             alt={candyColor}
-            style={{backgroundColor: candyColor}}></img>
+            style={{backgroundColor: candyColor}}
+            data-id={index}
+            draggable={true}
+            onDragStart={handleDragStart}
+            onDragOver={prevDefault}
+            onDragEnter={prevDefault}
+            onDragLeave={prevDefault}
+            onDrop={handleOnDrop}
+            onDragEnd={handleDragEnd}
+          >
+          </img>
         ))}
       </div>
     </div>
