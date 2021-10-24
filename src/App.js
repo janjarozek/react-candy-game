@@ -1,11 +1,44 @@
 import React, {useState, useEffect} from 'react'
 
 const width = 8
+// const candyColors = ['blue', 'green', 'orange']
 const candyColors = ['blue', 'green', 'orange', 'purple', 'red', 'yellow']
 
 
 const App = () => {
   const [currentColorArrangement, setCurrentColorArrangement] = useState([])
+
+  
+
+  const checkForRowOfThree = () => {
+    // select a row
+    for(let j=0; j < width; j++) {
+      // check in a row
+      for(let i = j*width; i < width+(j*width)-3; i++) {
+        const rowOfThree = [i, i+1, i+2]
+        const decidedColor = currentColorArrangement[i]
+
+        if(rowOfThree.every(square => currentColorArrangement[square] === decidedColor)) {
+          rowOfThree.forEach(square => currentColorArrangement[square] = '')
+        }
+      }
+    }
+  }
+
+  const checkForRowOfFour = () => {
+    // select a row
+    for(let j=0; j < width; j++) {
+      // check in a row
+      for(let i = j*width; i < width+(j*width)-4; i++) {
+        const rowOfFour = [i, i+1, i+2, i+3]
+        const decidedColor = currentColorArrangement[i]
+
+        if(rowOfFour.every(square => currentColorArrangement[square] === decidedColor)) {
+          rowOfFour.forEach(square => currentColorArrangement[square] = '')
+        }
+      }
+    }
+  }
 
   const checkForColumnOfThree = () => {
     for(let i=0; i < (width *(width-2))-1; i++) {
@@ -45,11 +78,15 @@ const App = () => {
 
   useEffect(() => {
     const timer = setInterval(() => {
+      checkForRowOfFour()
+      checkForColumnOfFour()
+      checkForRowOfThree()
       checkForColumnOfThree()
       setCurrentColorArrangement([...currentColorArrangement])
     }, 100)
     return () => clearInterval(timer)
-  }, [checkForColumnOfThree, currentColorArrangement])
+  }, [currentColorArrangement])
+  // }, [checkForColumnOfFour, checkForColumnOfThree, currentColorArrangement])
 
   // console.log(currentColorArrangement)
 
